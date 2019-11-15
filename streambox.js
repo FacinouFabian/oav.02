@@ -8,6 +8,12 @@ function getDuplicateName(filename){
     return `${base}.copy${ext}`
 }
 
+function getJSON(filename){
+    const ext = path.extname(filename)
+    const base = path.basename(filename, ext)
+    return `${base}.json`
+}
+
 function duplicate(filename){
     const outputFileName = getDuplicateName(filename)
     const file = fs.createReadStream(filename)
@@ -42,12 +48,6 @@ function transform(filename, re, cb, inStdout = true){
         })
         rstream.pipe(tstream).pipe(wstream)
     }
-}
-
-function getJSON(filename){
-    const ext = path.extname(filename)
-    const base = path.basename(filename, ext)
-    return `${base}.json`
 }
 
 function csv2json(filename){
@@ -92,8 +92,68 @@ function csv2json(filename){
     })
 }
 
+/// PIPE WC 1 ///
+
+function catPipewc(directory, type, cb){
+
+    let count = 0
+
+    fs.readdir(directory, function(err, items) {
+
+        for (const item of items){
+
+            const rstream = fs.createReadStream(directory+'/'+item)
+            const ext = path.extname(item)
+
+            if(ext === type){
+                rstream.on('data', chunk => {
+                    count += chunk.toString().length
+                })
+
+                rstream.on('end', () => {
+                    console.log(count)
+                })
+            }
+        }
+        cb(count)
+    })
+}
+
+/// PIPE WC 2 (PROMISE)///
+
+function catPipewc(directory, type, cb){
+
+    let count = 0
+
+    fs.readdir(directory, function(err, items) {
+
+        for (const item of items){
+
+            const rstream = fs.createReadStream(directory+'/'+item)
+            const ext = path.extname(item)
+
+            if(ext === type){
+                rstream.on('data', chunk => {
+                    count += chunk.toString().length
+                })
+
+                rstream.on('end', () => {
+                    console.log(count)
+                })
+            }
+        }
+        cb(count)
+    })
+}
+
+/// EXO 6 ///
+function convertToJSON(){
+
+}
+
 module.exports = {
     duplicate,
     transform,
-    csv2json
+    csv2json, 
+    catPipewc
 }
